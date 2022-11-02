@@ -3,6 +3,8 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include <type_traits>
+
 namespace lua_wrapper
 {
     LuaContext::LuaContext()
@@ -11,6 +13,7 @@ namespace lua_wrapper
         if (!lua_state_)
             throw OutOfMemoryException("Could not create Lua state");
     }
+
     LuaContext::~LuaContext()
     {
         lua_close(lua_state_);
