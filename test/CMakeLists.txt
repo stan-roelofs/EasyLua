@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.18.0)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -11,11 +11,14 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 set(SOURCES
-    src/lua_wrapper_test.cpp
+    src/call.cpp
 )
 
-add_executable(LuaWrapperTest ${SOURCES})
-target_link_libraries(LuaWrapperTest LuaWrapper gtest_main)
+find_package(Lua REQUIRED)
+
+add_executable(EasyLuaTest ${SOURCES})
+target_link_libraries(EasyLuaTest lua gtest_main)
+target_include_directories(EasyLuaTest PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 include(GoogleTest)
-gtest_discover_tests(LuaWrapperTest)
+gtest_discover_tests(EasyLuaTest)

@@ -1,5 +1,5 @@
-#ifndef __LUA_WRAPPER_H
-#define __LUA_WRAPPER_H
+#ifndef __EASYLUA_H
+#define __EASYLUA_H
 
 #include <lua.hpp>
 #include <stdexcept>
@@ -8,11 +8,9 @@
 #include <string_view>
 #include <tuple>
 
-#include "types.h"
-
 #define Log(...) (printf(__VA_ARGS__));
 
-namespace lua_wrapper
+namespace easylua
 {
     class Exception : public std::runtime_error
     {
@@ -38,11 +36,25 @@ namespace lua_wrapper
         CallException(std::string msg) : Exception(msg) {}
     };
 
+    using string = const char *;
+    using integer = int;
+    using number = lua_Number;
+    using boolean = bool;
+
     class LuaContext final
     {
     public:
-        LuaContext();
-        ~LuaContext();
+        LuaContext(lua_State *state = nullptr) : lua_state_(state)
+        {
+            if (!lua_state_)
+                lua_state_ = luaL_newstate();
+            if (!lua_state_)
+                throw OutOfMemoryException("Could not create Lua state");
+        }
+        ~LuaContext()
+        {
+            lua_close(lua_state_);
+        }
 
         lua_State *GetRawState() { return lua_state_; }
 
