@@ -126,7 +126,7 @@ TEST_F(Stack, get_string_view_throws_on_wrong_type)
 TEST_F(Stack, get_c_string)
 {
     lua_pushstring(L, "Hello");
-    EXPECT_STREQ("Hello", *stack::Get<const char *>(L, 1));
+    EXPECT_STREQ("Hello", stack::Get<const char *>(L, 1));
 }
 
 TEST_F(Stack, get_c_string_throws_on_wrong_type)

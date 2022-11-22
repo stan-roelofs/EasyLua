@@ -1,8 +1,6 @@
 #ifndef __EASYLUA_STACK_H
 #define __EASYLUA_STACK_H
 
-#include <optional>
-
 #include <lua.hpp>
 #include "exception.hpp"
 
@@ -16,10 +14,10 @@ namespace easylua
          * @tparam T The type of the value to get.
          * @param L The Lua state.
          * @param index The index of the value on the stack.
-         * @return std::optional<T> The value at the given index, or std::nullopt if the value is nil.
+         * @return T The value at the given index.
          */
         template <typename T>
-        std::optional<T> Get(lua_State *L, int index)
+        T Get(lua_State *L, int index)
         {
             if (index == 0)
                 throw InvalidArgumentException("index", "cannot be 0");
