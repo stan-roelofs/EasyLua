@@ -12,6 +12,7 @@ FetchContent_MakeAvailable(googletest)
 
 set(SOURCES
     src/call.cpp
+    src/stack.cpp
 )
 
 find_package(Lua REQUIRED)
