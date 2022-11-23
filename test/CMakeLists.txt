@@ -10,7 +10,7 @@ add_executable(EasyLuaTest ${SOURCES})
 find_package(Lua REQUIRED)
 find_package(GTest REQUIRED)
 
-target_link_libraries(EasyLuaTest lua gtest_main)
+target_link_libraries(EasyLuaTest lua gtest gtest_main)
 target_include_directories(EasyLuaTest PRIVATE ${CMAKE_SOURCE_DIR}/include ${GTEST_INCLUDE_DIRS})
 
 include(GoogleTest)
