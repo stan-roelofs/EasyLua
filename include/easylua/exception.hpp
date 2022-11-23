@@ -12,10 +12,14 @@ namespace easylua
         Exception() {}
     };
 
-    class OutOfMemoryException : public Exception
+    class MemoryAllocationException : public Exception
     {
     public:
-        OutOfMemoryException(std::string msg) : Exception() {} // TODO
+        MemoryAllocationException() = default;
+        const char *what() const noexcept override
+        {
+            return "Memory allocation failed";
+        }
     };
 
     class TypeException : public Exception
