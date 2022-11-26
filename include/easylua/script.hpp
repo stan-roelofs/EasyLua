@@ -1,8 +1,9 @@
 #ifndef __EASYLUA_SCRIPT_H
 #define __EASYLUA_SCRIPT_H
 
-#include <lua.hpp>
 #include <string>
+
+#include <lua.hpp>
 
 #include "exception.hpp"
 
@@ -12,11 +13,11 @@ namespace easylua
     {
         enum class LoadResult
         {
-            OK,
-            SyntaxError,
-            MemoryAllocationError,
-            FileError,
-            UnknownError
+            kOK,
+            kSyntaxError,
+            kMemoryAllocationError,
+            kFileError,
+            kUnknownError
         };
 
         /**
@@ -26,7 +27,7 @@ namespace easylua
          * @param path The path to the script.
          * @return LoadResult The result of the load.
          */
-        LoadResult LoadFile(lua_State *L, const std::string &path)
+        LoadResult FromFile(lua_State *L, const std::string &path)
         {
             if (path.empty())
                 throw InvalidArgumentException("path", "cannot be empty");
@@ -36,16 +37,16 @@ namespace easylua
             switch (result)
             {
             case 0:
-                return LoadResult::OK;
+                return LoadResult::kOK;
             case LUA_ERRSYNTAX:
-                return LoadResult::SyntaxError;
+                return LoadResult::kSyntaxError;
             case LUA_ERRMEM:
-                return LoadResult::MemoryAllocationError;
+                return LoadResult::kMemoryAllocationError;
             case LUA_ERRFILE:
-                return LoadResult::FileError;
+                return LoadResult::kFileError;
             }
 
-            return LoadResult::UnknownError;
+            return LoadResult::kUnknownError;
         }
 
         /**
@@ -55,20 +56,24 @@ namespace easylua
          * @param script The script.
          * @return LoadResult The result of the load.
          */
-        LoadResult LoadString(lua_State *L, const std::string &script)
+        LoadResult FromString(lua_State *L, const std::string &script)
         {
             const int result = luaL_loadstring(L, script.c_str());
 
             switch (result)
             {
             case 0:
-                return LoadResult::OK;
+                return LoadResult::kOK;
             case LUA_ERRSYNTAX:
-                return LoadResult::SyntaxError;
+                return LoadResult::kSyntaxError;
             case LUA_ERRMEM:
-                return LoadResult::MemoryAllocationError;
+                return LoadResult::kMemoryAllocationError;
             }
+
+            return LoadResult::kUnknownError;
         }
+
+        // TODO runfile runstring
     }
 
 } // namespace easylua
