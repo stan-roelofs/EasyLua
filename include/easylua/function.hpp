@@ -39,7 +39,9 @@ namespace easylua
             template <typename T>
             operator T()
             {
-                return stack::Pop<T>(lua_state_);
+                T result = stack::Get<T>(lua_state_, -1);
+                stack::Pop(lua_state_, 1);
+                return result;
             }
 
         private:

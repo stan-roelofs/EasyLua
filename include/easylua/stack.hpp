@@ -57,11 +57,11 @@ namespace easylua
         }
 
         /**
-         * @brief Set the value at the given index on the stack.
+         * @brief Push the given value onto the stack.
          *
          * @tparam T The type of the value to set.
          * @param L The Lua state.
-``         * @param value The value to set.
+         * @param value The value to set.
          */
         template <typename T>
         void Push(lua_State *L, T value)
@@ -89,20 +89,31 @@ namespace easylua
             Push(L, args...);
         }
 
-        template <typename T>
-        T Pop(lua_State *L)
+        /**
+         * @brief Pops values from the Lua stack.
+         * @param L The Lua state.
+         * @param count The number of values to pop.
+         */
+        inline void Pop(lua_State *L, int count = 1)
         {
-            T value = Get<T>(L, -1);
-            lua_pop(L, 1);
-            return value;
+            lua_pop(L, count);
         }
 
+        /**
+         * @brief Check if the value at the given index on the stack is of the given type.
+         *
+         * @param L The Lua state.
+         * @param index The index of the value on the stack.
+         * @param type The expected Lua type.
+         * @return true If the value at the given index on the stack is of the given type.
+         *         false If the value at the given index on the stack is not of the given type.
+         */
         inline bool CheckType(lua_State *L, int index, int type)
         {
             return lua_type(L, index) == type;
         }
-    }
 
+    } // namespace stack
 } // namespace easylua
 
 #endif
