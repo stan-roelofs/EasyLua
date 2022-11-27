@@ -2,10 +2,12 @@
 #define __EASYLUA_STACK_H
 
 #include <lua.hpp>
+
 #include "exception.hpp"
 
 namespace easylua
 {
+    // TODO should this throw an exception or return an optional<T>?
     namespace stack
     {
         /**
@@ -59,15 +61,11 @@ namespace easylua
          *
          * @tparam T The type of the value to set.
          * @param L The Lua state.
-         * @param index The index of the value on the stack.
-         * @param value The value to set.
+``         * @param value The value to set.
          */
         template <typename T>
-        void Set(lua_State *L, int index, T value)
+        void Push(lua_State *L, T value)
         {
-            if (index == 0)
-                throw InvalidArgumentException("index", "cannot be 0");
-
             if constexpr (std::is_same_v<T, const char *>)
                 lua_pushstring(L, value);
             else if constexpr (std::is_same_v<T, std::string>)
@@ -82,6 +80,21 @@ namespace easylua
                 lua_pushnumber(L, value);
             else
                 throw InvalidArgumentException("T", "is not a supported type");
+        }
+
+        template <typename Arg, typename... Args>
+        void Push(lua_State *L, Arg arg, Args... args)
+        {
+            Push(L, arg);
+            Push(L, args...);
+        }
+
+        template <typename T>
+        T Pop(lua_State *L)
+        {
+            T value = Get<T>(L, -1);
+            lua_pop(L, 1);
+            return value;
         }
     }
 

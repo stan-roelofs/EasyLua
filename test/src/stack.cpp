@@ -143,76 +143,71 @@ TEST_F(Stack, get_unsupported_type_throws)
     EXPECT_THROW(stack::Get<Foo>(L, 1), InvalidArgumentException);
 }
 
-TEST_F(Stack, set_index_zero_throws)
+TEST_F(Stack, push_multiple_values)
 {
-    EXPECT_THROW(stack::Set(L, 0, 42), InvalidArgumentException);
-}
-
-TEST_F(Stack, set_index_greater_than_one)
-{
-    stack::Set(L, 1, 42);
-    stack::Set(L, 2, 43);
-    stack::Set(L, 3, 44);
+    stack::Push(L, 42);
+    stack::Push(L, 43);
+    stack::Push(L, 44);
 
     EXPECT_EQ(lua_tointeger(L, 1), 42);
     EXPECT_EQ(lua_tointeger(L, 2), 43);
     EXPECT_EQ(lua_tointeger(L, 3), 44);
 }
 
-TEST_F(Stack, set_lua_integer)
+TEST_F(Stack, push_lua_integer)
 {
     lua_Integer i = 5;
-    stack::Set(L, 1, i);
+    stack::Push(L, i);
     EXPECT_EQ(lua_tointeger(L, 1), 5);
 }
 
-TEST_F(Stack, set_integral_type)
+TEST_F(Stack, push_integral_type)
 {
-    stack::Set(L, 1, 5);
+    stack::Push(L, 5);
     EXPECT_EQ(lua_tointeger(L, 1), 5);
 }
 
-TEST_F(Stack, set_lua_number)
+TEST_F(Stack, push_lua_number)
 {
     lua_Number n = 5.5;
-    stack::Set(L, 1, n);
+    stack::Push(L, n);
     EXPECT_EQ(lua_tonumber(L, 1), 5.5);
 }
 
-TEST_F(Stack, set_floating_point_type)
+TEST_F(Stack, push_floating_point_type)
 {
-    stack::Set(L, 1, 5.5);
+    stack::Push(L, 5.5);
     EXPECT_EQ(lua_tonumber(L, 1), 5.5);
 }
 
-TEST_F(Stack, set_bool)
+TEST_F(Stack, push_bool)
 {
-    stack::Set(L, 1, true);
+    stack::Push(L, true);
     EXPECT_TRUE(lua_toboolean(L, 1));
 }
 
-TEST_F(Stack, set_string)
+TEST_F(Stack, push_string)
 {
-    stack::Set(L, 1, std::string("Hello"));
+    stack::Push(L, std::string("Hello"));
     EXPECT_EQ(std::string("Hello"), lua_tostring(L, 1));
 }
 
-TEST_F(Stack, set_string_view)
+TEST_F(Stack, push_string_view)
 {
-    stack::Set(L, 1, std::string_view("Hello"));
+    stack::Push(L, std::string_view("Hello"));
     EXPECT_EQ(std::string_view("Hello"), lua_tostring(L, 1));
 }
 
-TEST_F(Stack, set_c_string)
+TEST_F(Stack, push_c_string)
 {
-    stack::Set(L, 1, "Hello");
+    stack::Push(L, "Hello");
     EXPECT_STREQ("Hello", lua_tostring(L, 1));
 }
 
-TEST_F(Stack, set_unsupported_type_throws)
+TEST_F(Stack, push_unsupported_type_throws)
 {
     struct Foo
     {
     };
-    EXPECT_THROW(stack::Set(L, 1, Foo{}), InvalidArgumentException);
+    EXPECT_THROW(stack::Push(L, Foo{}), InvalidArgumentException);
 }
