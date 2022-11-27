@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.18.0)
 
 set(SOURCES
-    src/call.cpp
+    src/function.cpp
+    src/script.cpp
     src/stack.cpp
     src/state.cpp
     src/state_view.cpp
