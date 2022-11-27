@@ -10,11 +10,11 @@
 
 namespace easylua
 {
-    /** Represents a Lua function. */
-    class Function
+    /** Represents a Lua function on the stack. */
+    class StackFunction
     {
     public:
-        Function(lua_State *state) : lua_state_(state)
+        StackFunction(lua_State *state, int index = -1) : lua_state_(state), index_(index)
         {
             if (!lua_state_)
                 throw InvalidArgumentException("state", "cannot be null");
@@ -49,6 +49,9 @@ namespace easylua
         template <typename... Args>
         Result Call(Args... args)
         {
+            if (!stack::CheckType(lua_state_, index_, LUA_TFUNCTION))
+                throw TypeException(index_, lua_type(lua_state_, index_), LUA_TFUNCTION);
+
             // Call the function
             const int num_args = sizeof...(Args);
 
@@ -76,6 +79,7 @@ namespace easylua
 
     private:
         lua_State *lua_state_;
+        int index_;
     };
 } // namespace easylua
 
