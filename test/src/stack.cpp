@@ -135,14 +135,6 @@ TEST_F(Stack, get_c_string_throws_on_wrong_type)
     EXPECT_THROW(stack::Get<const char *>(L, 1), TypeException);
 }
 
-TEST_F(Stack, get_unsupported_type_throws)
-{
-    struct Foo
-    {
-    };
-    EXPECT_THROW(stack::Get<Foo>(L, 1), InvalidArgumentException);
-}
-
 TEST_F(Stack, push_multiple_values)
 {
     stack::Push(L, 42);
@@ -202,12 +194,4 @@ TEST_F(Stack, push_c_string)
 {
     stack::Push(L, "Hello");
     EXPECT_STREQ("Hello", lua_tostring(L, 1));
-}
-
-TEST_F(Stack, push_unsupported_type_throws)
-{
-    struct Foo
-    {
-    };
-    EXPECT_THROW(stack::Push(L, Foo{}), InvalidArgumentException);
 }

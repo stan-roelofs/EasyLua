@@ -52,8 +52,8 @@ namespace easylua
 
                 throw TypeException(index, lua_type(L, index), LUA_TSTRING);
             }
-
-            throw InvalidArgumentException("T", "is not a supported type");
+            else
+                static_assert(!sizeof(T *), "Unsupported type");
         }
 
         /**
@@ -79,7 +79,7 @@ namespace easylua
             else if constexpr (std::is_floating_point_v<T> || std::is_same_v<T, lua_Number>)
                 lua_pushnumber(L, value);
             else
-                throw InvalidArgumentException("T", "is not a supported type");
+                static_assert(!sizeof(T *), "Unsupported type");
         }
 
         template <typename Arg, typename... Args>
@@ -95,6 +95,11 @@ namespace easylua
             T value = Get<T>(L, -1);
             lua_pop(L, 1);
             return value;
+        }
+
+        inline bool CheckType(lua_State *L, int index, int type)
+        {
+            return lua_type(L, index) == type;
         }
     }
 
