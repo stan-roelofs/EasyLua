@@ -9,6 +9,14 @@ TEST(StackFunction, constructor_throws_on_null_state)
     EXPECT_THROW(StackFunction(nullptr), InvalidArgumentException);
 }
 
+TEST(StackFunction, call_throws_on_invalid_index)
+{
+    lua_State *L = luaL_newstate();
+    lua_pushnumber(L, 1);
+    EXPECT_THROW(StackFunction(L, -1).Call(), TypeException);
+    lua_close(L);
+}
+
 TEST(StackFunction, call)
 {
     lua_State *L = luaL_newstate();
