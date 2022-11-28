@@ -1,62 +1,43 @@
 #ifndef __EASYLUA_EXCEPTION_H
 #define __EASYLUA_EXCEPTION_H
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace easylua
 {
-    class Exception : public std::exception
+    class Exception : public std::runtime_error
     {
     protected:
-        Exception() {}
+        Exception(std::string message) : std::runtime_error(message) {}
     };
 
     class MemoryAllocationException : public Exception
     {
     public:
-        MemoryAllocationException() = default;
-        const char *what() const noexcept override
-        {
-            return "Memory allocation failed";
-        }
+        MemoryAllocationException() : Exception("Memory allocation failed") {}
     };
 
     class TypeException : public Exception
     {
     public:
-        TypeException(int index, int actual_type, int expected_type) : index_(index), actual_type_(actual_type), expected_type_(expected_type) {}
-        const char *what() const noexcept override
+        TypeException(int index, int actual_type, int expected_type) : Exception("Type mismatch at index " + std::to_string(index) + ": expected " + std::to_string(expected_type) + ", got " + std::to_string(actual_type))
         {
-            const std::string msg = "Type mismatch at index " + std::to_string(index_) + ": expected " + std::to_string(expected_type_) + ", got " + std::to_string(actual_type_);
-            return msg.c_str();
         }
-
-    private:
-        int index_;
-        int actual_type_;
-        int expected_type_;
     };
 
     class InvalidArgumentException : public Exception
     {
     public:
-        InvalidArgumentException(std::string_view argument, std::string_view why) : argument_(argument), why_(why) {}
-        const char *what() const noexcept override
+        InvalidArgumentException(std::string argument, std::string why) : Exception("Invalid argument '" + argument + "': " + why)
         {
-            const std::string msg = "Invalid argument '" + std::string(argument_) + "': " + std::string(why_);
-            return msg.c_str();
         }
-
-    private:
-        std::string_view argument_;
-        std::string_view why_;
     };
 
     class CallException : public Exception
     {
     public:
-        CallException(std::string msg) : Exception() {} // TODO
+        CallException(std::string reason) : Exception("Call failed: " + reason) {}
     };
 }
 
