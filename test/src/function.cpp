@@ -70,3 +70,34 @@ TEST(StackFunction, call_with_return)
 
     lua_close(L);
 }
+
+TEST(StackFunction, call_with_multiple_returns)
+{
+    lua_State *L = luaL_newstate();
+    ASSERT_EQ(0, luaL_dostring(L, "function f() return 1, \"abc\"; end"));
+    ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
+
+    easylua::StackFunction f(L);
+    const std::tuple<int, std::string_view> result = f();
+
+    ASSERT_EQ(1, std::get<0>(result));
+    ASSERT_EQ("abc", std::get<1>(result));
+
+    lua_close(L);
+}
+
+TEST(StackFunction, call_with_parameter_and_return)
+{
+    lua_State *L = luaL_newstate();
+    ASSERT_EQ(0, luaL_dostring(L, "function f(a) return a + 1, a + 2, a + 3; end"));
+    ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
+
+    easylua::StackFunction f(L);
+    std::tuple<short, int, long> result = f(42);
+
+    ASSERT_EQ(43, std::get<0>(result));
+    ASSERT_EQ(44, std::get<1>(result));
+    ASSERT_EQ(45, std::get<2>(result));
+
+    lua_close(L);
+}

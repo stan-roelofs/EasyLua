@@ -44,6 +44,14 @@ namespace easylua
                 return result;
             }
 
+            template <typename... T>
+            operator std::tuple<T...>()
+            {
+                std::tuple<T...> result = stack::Get<T...>(lua_state_);
+                stack::Pop(lua_state_, sizeof...(T));
+                return result;
+            }
+
         private:
             lua_State *lua_state_;
         };

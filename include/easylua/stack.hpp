@@ -19,7 +19,7 @@ namespace easylua
          * @return T The value at the given index.
          */
         template <typename T>
-        T Get(lua_State *L, int index)
+        T Get(lua_State *L, int index = -1)
         {
             if (index == 0)
                 throw InvalidArgumentException("index", "cannot be 0");
@@ -54,6 +54,13 @@ namespace easylua
             }
             else
                 static_assert(!sizeof(T *), "Unsupported type");
+        }
+
+        template <typename... T, typename std::enable_if_t<(sizeof...(T) >= 2), bool> = true>
+        std::tuple<T...> Get(lua_State *L)
+        {
+            int index = -1;
+            return std::tuple<T...>(Get<T>(L, index--)...);
         }
 
         /**
