@@ -12,10 +12,7 @@ public:
             throw std::runtime_error("Could not create Lua state");
     }
 
-    ~Stack()
-    {
-        lua_close(L);
-    }
+    ~Stack() { lua_close(L); }
 
 protected:
     lua_State *L;

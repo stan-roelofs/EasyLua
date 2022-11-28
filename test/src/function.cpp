@@ -57,6 +57,18 @@ TEST(StackFunction, call_with_multiple_arguments)
     lua_close(L);
 }
 
+TEST(StackFunction, call_with_no_return_throws_when_getting_return_value)
+{
+    lua_State *L = luaL_newstate();
+    ASSERT_EQ(0, luaL_dostring(L, "function f() end"));
+    ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
+
+    easylua::StackFunction f(L);
+    EXPECT_THROW({ int a = f(); }, CallException);
+
+    lua_close(L);
+}
+
 TEST(StackFunction, call_with_return)
 {
     lua_State *L = luaL_newstate();
@@ -89,7 +101,8 @@ TEST(StackFunction, call_with_multiple_returns)
 TEST(StackFunction, call_with_parameter_and_return)
 {
     lua_State *L = luaL_newstate();
-    ASSERT_EQ(0, luaL_dostring(L, "function f(a) return a + 1, a + 2, a + 3; end"));
+    ASSERT_EQ(0,
+              luaL_dostring(L, "function f(a) return a + 1, a + 2, a + 3; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
     easylua::StackFunction f(L);
