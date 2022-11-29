@@ -120,6 +120,10 @@ namespace easylua
             return lua_type(L, index) == type;
         }
 
+        inline int Top(lua_State *L)
+        {
+            return lua_gettop(L);
+        }
     } // namespace stack
 } // namespace easylua
 
