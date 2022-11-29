@@ -13,7 +13,7 @@ TEST(StackFunction, call_throws_on_invalid_index)
 {
     lua_State *L = luaL_newstate();
     lua_pushnumber(L, 1);
-    EXPECT_THROW(StackFunction(L, -1).Call(), TypeException);
+    EXPECT_THROW(StackFunction(L, -1)(), TypeException);
     lua_close(L);
 }
 
