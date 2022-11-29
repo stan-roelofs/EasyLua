@@ -2,22 +2,22 @@
 
 #include <gtest/gtest.h>
 
-TEST(State, constructor)
+TEST(state, constructor)
 {
-    easylua::State state;
-    EXPECT_NE(nullptr, state.GetLuaState());
+    easylua::state state;
+    EXPECT_NE(nullptr, state.get_state());
 }
 
-TEST(State, move_constructor)
+TEST(state, move_constructor)
 {
-    easylua::State state;
-    easylua::State state2(std::move(state));
-    EXPECT_NE(nullptr, state2.GetLuaState());
+    easylua::state state;
+    easylua::state state2(std::move(state));
+    EXPECT_NE(nullptr, state2.get_state());
 }
 
-TEST(State, move_assignment)
+TEST(state, move_assignment)
 {
-    easylua::State state;
-    easylua::State state2 = std::move(state);
-    EXPECT_NE(nullptr, state2.GetLuaState());
+    easylua::state state;
+    easylua::state state2 = std::move(state);
+    EXPECT_NE(nullptr, state2.get_state());
 }

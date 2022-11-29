@@ -7,14 +7,15 @@
 
 namespace easylua
 {
-    class State final : public StateView
+    class state final : public state_view
     {
     public:
-        State() : StateView(luaL_newstate())
+        state() : state_view(luaL_newstate())
         {
+            // TODO set panic?
         }
 
-        ~State()
+        ~state()
         {
             if (lua_state_)
                 lua_close(lua_state_);
@@ -22,15 +23,15 @@ namespace easylua
             lua_state_ = nullptr;
         }
 
-        State(const State &other) = delete;
-        State &operator=(const State &other) = delete;
+        state(const state &other) = delete;
+        state &operator=(const state &other) = delete;
 
-        State(State &&other) : StateView(other.lua_state_)
+        state(state &&other) : state_view(other.lua_state_)
         {
             other.lua_state_ = nullptr;
         }
 
-        State &operator=(State &&other)
+        state &operator=(state &&other)
         {
             std::swap(lua_state_, other.lua_state_);
             return *this;

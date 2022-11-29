@@ -6,38 +6,26 @@
 
 namespace easylua
 {
-    class Exception : public std::runtime_error
-    {
-    protected:
-        Exception(std::string message) : std::runtime_error(message) {}
-    };
-
-    class MemoryAllocationException : public Exception
+    class runtime_error : public std::runtime_error
     {
     public:
-        MemoryAllocationException() : Exception("Memory allocation failed") {}
+        runtime_error(std::string message) : std::runtime_error(message) {}
     };
 
-    class TypeException : public Exception
+    class type_error : public runtime_error
     {
     public:
-        TypeException(int index, int actual_type, int expected_type) : Exception("Type mismatch at index " + std::to_string(index) + ": expected " + std::to_string(expected_type) + ", got " + std::to_string(actual_type))
+        type_error(int index, int actual_type, int expected_type) : runtime_error("Type mismatch at index " + std::to_string(index) + ": expected " + std::to_string(expected_type) + ", got " + std::to_string(actual_type))
         {
         }
     };
 
-    class InvalidArgumentException : public Exception
+    class invalid_argument : public runtime_error
     {
     public:
-        InvalidArgumentException(std::string argument, std::string why) : Exception("Invalid argument '" + argument + "': " + why)
+        invalid_argument(std::string argument, std::string why) : runtime_error("Invalid argument '" + argument + "': " + why)
         {
         }
-    };
-
-    class CallException : public Exception
-    {
-    public:
-        CallException(std::string reason) : Exception("Call failed: " + reason) {}
     };
 }
 

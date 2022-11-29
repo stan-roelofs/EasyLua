@@ -7,6 +7,7 @@
 
 #include "exception.hpp"
 #include "stack.hpp"
+#include "reference.hpp"
 
 namespace easylua
 {
@@ -21,55 +22,55 @@ namespace easylua
      * Instances of this class are meant to be temporary, and should not be stored. Storing an instance of this class may result in a corrupt
      * Lua stack.
      */
-    class FunctionResult
+    class function_result
     {
     public:
         /**
-         * @brief Construct a new FunctionResult object
+         * @brief Construct a new function_result object
          *
          * @param state Lua state.
          * @param number_of_results The number of result that are on the stack. This will be used to pop the values from the stack when the object is destructed.
          */
-        FunctionResult(lua_State *state, std::size_t number_of_results) : lua_state_(state), number_of_results_(number_of_results)
-            {
-                if (!lua_state_)
-                    throw InvalidArgumentException("state", "cannot be null");
-            }
+        function_result(lua_State *state, std::size_t number_of_results) : lua_state_(state), number_of_results_(number_of_results)
+        {
+            if (!lua_state_)
+                throw invalid_argument("state", "cannot be null");
+        }
 
-        ~FunctionResult()
-            {
-                stack::Pop(lua_state_, number_of_results_);
-            }
+        ~function_result()
+        {
+            stack::pop(lua_state_, number_of_results_);
+        }
 
-        FunctionResult(const FunctionResult &other) = delete;
-        FunctionResult(FunctionResult &&other) = delete;
-        FunctionResult &operator=(const FunctionResult &other) = delete;
-        FunctionResult &operator=(FunctionResult &&other) = delete;
+        function_result(const function_result &other) = delete;
+        function_result(function_result &&other) = delete;
+        function_result &operator=(const function_result &other) = delete;
+        function_result &operator=(function_result &&other) = delete;
 
-            template <typename T>
-            operator T()
-            {
-                if (number_of_results_ == 0)
-                    throw CallException("no results to convert");
+        template <typename T>
+        operator T()
+        {
+            if (number_of_results_ == 0)
+                throw runtime_error("no results to convert");
 
-                T result = stack::Get<T>(lua_state_, -1);
-                return result;
-            }
+            T result = stack::get<T>(lua_state_, -1);
+            return result;
+        }
 
-            template <typename... T>
-            operator std::tuple<T...>()
-            {
-                if (number_of_results_ == 0 && sizeof...(T) > 0)
-                    throw CallException("no results to convert");
+        template <typename... T>
+        operator std::tuple<T...>()
+        {
+            if (number_of_results_ == 0 && sizeof...(T) > 0)
+                throw runtime_error("no results to convert");
 
-                std::tuple<T...> result = stack::Get<T...>(lua_state_);
-                return result;
-            }
+            std::tuple<T...> result = stack::get<T...>(lua_state_);
+            return result;
+        }
 
-        private:
-            lua_State *lua_state_;
-            std::size_t number_of_results_;
-        };
+    private:
+        lua_State *lua_state_;
+        std::size_t number_of_results_;
+    };
 
     namespace detail
     {
@@ -78,60 +79,72 @@ namespace easylua
          *
          * @tparam Args The types of the arguments to pass to the function.
          * @param args The arguments to pass to the function.
-         * @return FunctionResult The result of calling the function.
-         * @throw TypeException If the value at the top of the stack is not a function.
-         * @throw CallException If the function call fails.
+         * @return function_result The result of calling the function.
+         * @throw type_error If the value at the top of the stack is not a function.
+         * @throw runtime_error If the function call fails.
          */
         template <typename... Args>
-        FunctionResult CallFunction(lua_State *L, Args... args)
+        function_result call_function(lua_State *L, Args... args)
         {
-            if (!stack::CheckType(L, -1, LUA_TFUNCTION))
-                throw TypeException(-1, lua_type(L, -1), LUA_TFUNCTION);
+            if (!stack::check_type(L, -1, LUA_TFUNCTION))
+                throw type_error(-1, lua_type(L, -1), LUA_TFUNCTION);
 
-            const int old_stack = stack::Top(L);
+            const int old_stack = stack::get_top(L);
 
             // Call the function
             const int num_args = sizeof...(Args);
 
-            // Push the arguments
+            // push the arguments
             if constexpr (num_args > 0)
-                stack::Push(L, args...);
+                stack::push(L, args...);
 
             if (lua_pcall(L, num_args, LUA_MULTRET, 0) != 0)
             {
                 const char *error_message = lua_tostring(L, -1);
-                stack::Pop(L, 1);
-                throw CallException(error_message);
+                stack::pop(L, 1);
+                throw runtime_error(error_message);
             }
 
-            const int number_of_results = 1 + stack::Top(L) - old_stack; // +1 because function was already on the stack
+            const int number_of_results = 1 + stack::get_top(L) - old_stack; // +1 because function was already on the stack
 
             // Read the results
-            return FunctionResult(L, number_of_results);
+            return function_result(L, number_of_results);
         }
     };
 
     /** Represents a Lua function on the stack. */
-    class StackFunction
+    class stack_function
     {
     public:
-        StackFunction(lua_State *state, int index = -1) : lua_state_(state), index_(index)
+        stack_function(lua_State *state, int index = -1) : lua_state_(state), index_(index)
         {
             if (!lua_state_)
-                throw InvalidArgumentException("state", "cannot be null");
+                throw invalid_argument("state", "cannot be null");
         }
 
         template <typename... Args>
-        FunctionResult operator()(Args... args)
+        function_result operator()(Args... args)
         {
             lua_pushvalue(lua_state_, index_);
-            return detail::CallFunction(lua_state_, args...);
+            return detail::call_function(lua_state_, args...);
         }
 
     private:
         lua_State *lua_state_;
         int index_;
     };
+
+    /**
+     * @brief Represents a reference to a Lua function. Contrary to a stack_function, instances of this
+     *        class can be stored and used later because the function will be stored in the Lua registry.
+     */
+    // class FunctionReference : public Function, public reference
+    // {
+    // public:
+    //     FunctionReference(lua_State *state, int index = -1) : Function(state, index), reference(state, index)
+    //     {
+    //     }
+    // };
 } // namespace easylua
 
 #endif

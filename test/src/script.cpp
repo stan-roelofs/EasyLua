@@ -22,12 +22,12 @@ using namespace easylua;
 
 TEST_F(Script, load_string_succeeds)
 {
-    ASSERT_EQ(script::LoadResult::kOK,
-              script::FromString(L, "function test() end"));
+    ASSERT_EQ(script::load_result::result::ok,
+              script::from_string(L, "function test() end").get_result());
 }
 
 TEST_F(Script, load_string_fails_on_syntax_error)
 {
-    ASSERT_EQ(script::LoadResult::kSyntaxError,
-              script::FromString(L, "function test()"));
+    ASSERT_EQ(script::load_result::result::syntax_error,
+              script::from_string(L, "function test()").get_result());
 }

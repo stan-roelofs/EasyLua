@@ -2,51 +2,51 @@
 
 #include <gtest/gtest.h>
 
-TEST(StateView, constructor_throws_on_null_state)
+TEST(state_view, constructor_throws_on_null_state)
 {
-    EXPECT_THROW(easylua::StateView(nullptr), easylua::InvalidArgumentException);
+    EXPECT_THROW(easylua::state_view(nullptr), easylua::invalid_argument);
 }
 
-TEST(StateView, constructor)
+TEST(state_view, constructor)
 {
     lua_State *L = luaL_newstate();
-    easylua::StateView state(L);
-    EXPECT_EQ(L, state.GetLuaState());
+    easylua::state_view state(L);
+    EXPECT_EQ(L, state.get_state());
     lua_close(L);
 }
 
-TEST(StateView, copy_constructor)
+TEST(state_view, copy_constructor)
 {
     lua_State *L = luaL_newstate();
-    easylua::StateView state(L);
-    easylua::StateView state2(state);
-    EXPECT_EQ(L, state2.GetLuaState());
+    easylua::state_view state(L);
+    easylua::state_view state2(state);
+    EXPECT_EQ(L, state2.get_state());
     lua_close(L);
 }
 
-TEST(StateView, copy_assignment)
+TEST(state_view, copy_assignment)
 {
     lua_State *L = luaL_newstate();
-    easylua::StateView state(L);
-    easylua::StateView state2 = state;
-    EXPECT_EQ(L, state2.GetLuaState());
+    easylua::state_view state(L);
+    easylua::state_view state2 = state;
+    EXPECT_EQ(L, state2.get_state());
     lua_close(L);
 }
 
-TEST(StateView, move_constructor)
+TEST(state_view, move_constructor)
 {
     lua_State *L = luaL_newstate();
-    easylua::StateView state(L);
-    easylua::StateView state2(std::move(state));
-    EXPECT_EQ(L, state2.GetLuaState());
+    easylua::state_view state(L);
+    easylua::state_view state2(std::move(state));
+    EXPECT_EQ(L, state2.get_state());
     lua_close(L);
 }
 
-TEST(StateView, move_assignment)
+TEST(state_view, move_assignment)
 {
     lua_State *L = luaL_newstate();
-    easylua::StateView state(L);
-    easylua::StateView state2 = std::move(state);
-    EXPECT_EQ(L, state2.GetLuaState());
+    easylua::state_view state(L);
+    easylua::state_view state2 = std::move(state);
+    EXPECT_EQ(L, state2.get_state());
     lua_close(L);
 }

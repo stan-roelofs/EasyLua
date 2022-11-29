@@ -11,13 +11,30 @@ namespace easylua
 {
     namespace script
     {
-        enum class LoadResult
+        class load_result
         {
-            kOK,
-            kSyntaxError,
-            kMemoryAllocationError,
-            kFileError,
-            kUnknownError
+        public:
+            enum class result
+            {
+                ok,
+                syntax_error,
+                memory_error,
+                file_error,
+                error
+            };
+
+            load_result(result result, std::string error_message = "") : result_(result), error_message_(error_message)
+            {
+            }
+
+            result get_result() { return result_; }
+            const std::string &get_error_message() { return error_message_; }
+
+            bool operator()() { return result_ == result::ok; }
+
+        private:
+            result result_;
+            std::string error_message_;
         };
 
         /**
@@ -25,28 +42,30 @@ namespace easylua
          *
          * @param L The Lua state.
          * @param path The path to the script.
-         * @return LoadResult The result of the load.
+         * @return load_result The result of the load.
          */
-        LoadResult FromFile(lua_State *L, const std::string &path)
+        load_result from_file(lua_State *L, const std::string &path)
         {
             if (path.empty())
-                throw InvalidArgumentException("path", "cannot be empty");
+                throw invalid_argument("path", "cannot be empty");
 
             const int result = luaL_loadfile(L, path.c_str());
+            if (result == 0)
+                return load_result(load_result::result::ok, "");
+
+            const std::string error_message = lua_tostring(L, -1);
 
             switch (result)
             {
-            case 0:
-                return LoadResult::kOK;
             case LUA_ERRSYNTAX:
-                return LoadResult::kSyntaxError;
+                return load_result(load_result::result::syntax_error, error_message);
             case LUA_ERRMEM:
-                return LoadResult::kMemoryAllocationError;
+                return load_result(load_result::result::memory_error, error_message);
             case LUA_ERRFILE:
-                return LoadResult::kFileError;
+                return load_result(load_result::result::file_error, error_message);
             }
 
-            return LoadResult::kUnknownError;
+            return load_result(load_result::result::error, error_message);
         }
 
         /**
@@ -54,23 +73,28 @@ namespace easylua
          *
          * @param L The Lua state.
          * @param script The script.
-         * @return LoadResult The result of the load.
+         * @return load_result The result of the load.
          */
-        LoadResult FromString(lua_State *L, const std::string &script)
+        load_result from_string(lua_State *L, const std::string &script)
         {
             const int result = luaL_loadstring(L, script.c_str());
 
+            if (result == 0)
+                return load_result(load_result::result::ok, "");
+
+            const std::string error_message = lua_tostring(L, -1);
+
             switch (result)
             {
-            case 0:
-                return LoadResult::kOK;
             case LUA_ERRSYNTAX:
-                return LoadResult::kSyntaxError;
+                return load_result(load_result::result::syntax_error, error_message);
             case LUA_ERRMEM:
-                return LoadResult::kMemoryAllocationError;
+                return load_result(load_result::result::memory_error, error_message);
+            case LUA_ERRFILE:
+                return load_result(load_result::result::file_error, error_message);
             }
 
-            return LoadResult::kUnknownError;
+            return load_result(load_result::result::error, error_message);
         }
 
         // TODO runfile runstring

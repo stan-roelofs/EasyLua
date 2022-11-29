@@ -4,26 +4,26 @@
 
 using namespace easylua;
 
-TEST(StackFunction, constructor_throws_on_null_state)
+TEST(stack_function, constructor_throws_on_null_state)
 {
-    EXPECT_THROW(StackFunction(nullptr), InvalidArgumentException);
+    EXPECT_THROW(stack_function(nullptr), invalid_argument);
 }
 
-TEST(StackFunction, call_throws_on_invalid_index)
+TEST(stack_function, call_throws_on_invalid_index)
 {
     lua_State *L = luaL_newstate();
     lua_pushnumber(L, 1);
-    EXPECT_THROW(StackFunction(L, -1)(), TypeException);
+    EXPECT_THROW(stack_function(L, -1)(), type_error);
     lua_close(L);
 }
 
-TEST(StackFunction, call)
+TEST(stack_function, call)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0, luaL_dostring(L, "function f() a = 1; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
+    easylua::stack_function f(L);
     f();
 
     lua_getglobal(L, "a");
@@ -33,13 +33,13 @@ TEST(StackFunction, call)
     lua_close(L);
 }
 
-TEST(StackFunction, call_with_argument)
+TEST(stack_function, call_with_argument)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0, luaL_dostring(L, "function f(a) b = a; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
+    easylua::stack_function f(L);
     f(42);
 
     lua_getglobal(L, "b");
@@ -49,13 +49,13 @@ TEST(StackFunction, call_with_argument)
     lua_close(L);
 }
 
-TEST(StackFunction, call_with_multiple_arguments)
+TEST(stack_function, call_with_multiple_arguments)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0, luaL_dostring(L, "function f(a, b) c = a + b; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
+    easylua::stack_function f(L);
     f(1, 2);
 
     lua_getglobal(L, "c");
@@ -65,25 +65,25 @@ TEST(StackFunction, call_with_multiple_arguments)
     lua_close(L);
 }
 
-TEST(StackFunction, call_with_no_return_throws_when_getting_return_value)
+TEST(stack_function, call_with_no_return_throws_when_getting_return_value)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0, luaL_dostring(L, "function f() end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
-    EXPECT_THROW({ int a = f(); }, CallException);
+    easylua::stack_function f(L);
+    EXPECT_THROW({ int a = f(); }, runtime_error);
 
     lua_close(L);
 }
 
-TEST(StackFunction, call_with_return)
+TEST(stack_function, call_with_return)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0, luaL_dostring(L, "function f() return 42; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
+    easylua::stack_function f(L);
     int result = f();
 
     ASSERT_EQ(42, result);
@@ -91,13 +91,13 @@ TEST(StackFunction, call_with_return)
     lua_close(L);
 }
 
-TEST(StackFunction, call_with_multiple_returns)
+TEST(stack_function, call_with_multiple_returns)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0, luaL_dostring(L, "function f() return 1, \"abc\"; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
+    easylua::stack_function f(L);
     const std::tuple<int, std::string_view> result = f();
 
     ASSERT_EQ(1, std::get<0>(result));
@@ -106,14 +106,14 @@ TEST(StackFunction, call_with_multiple_returns)
     lua_close(L);
 }
 
-TEST(StackFunction, call_with_parameter_and_return)
+TEST(stack_function, call_with_parameter_and_return)
 {
     lua_State *L = luaL_newstate();
     ASSERT_EQ(0,
               luaL_dostring(L, "function f(a) return a + 1, a + 2, a + 3; end"));
     ASSERT_EQ(LUA_TFUNCTION, lua_getglobal(L, "f"));
 
-    easylua::StackFunction f(L);
+    easylua::stack_function f(L);
     std::tuple<short, int, long> result = f(42);
 
     ASSERT_EQ(43, std::get<0>(result));

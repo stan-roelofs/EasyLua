@@ -11,7 +11,7 @@ namespace easylua
     namespace stack
     {
         /**
-         * @brief Get the value at the given index on the stack.
+         * @brief get the value at the given index on the stack.
          *
          * @tparam T The type of the value to get.
          * @param L The Lua state.
@@ -19,59 +19,59 @@ namespace easylua
          * @return T The value at the given index.
          */
         template <typename T>
-        T Get(lua_State *L, int index = -1)
+        T get(lua_State *L, int index = -1)
         {
             if (index == 0)
-                throw InvalidArgumentException("index", "cannot be 0");
+                throw invalid_argument("index", "cannot be 0");
 
             if constexpr ((std::is_integral_v<T> || std::is_same_v<T, lua_Integer>)&&!std::is_same_v<T, bool>)
             {
                 if (lua_type(L, index) == LUA_TNUMBER)
                     return lua_tointeger(L, index);
 
-                throw TypeException(index, lua_type(L, index), LUA_TNUMBER);
+                throw type_error(index, lua_type(L, index), LUA_TNUMBER);
             }
             else if constexpr (std::is_floating_point_v<T> || std::is_same_v<T, lua_Number>)
             {
                 if (lua_type(L, index) == LUA_TNUMBER)
                     return lua_tonumber(L, index);
 
-                throw TypeException(index, lua_type(L, index), LUA_TNUMBER);
+                throw type_error(index, lua_type(L, index), LUA_TNUMBER);
             }
             else if constexpr (std::is_same_v<T, bool>)
             {
                 if (lua_type(L, index) == LUA_TBOOLEAN)
                     return lua_toboolean(L, index);
 
-                throw TypeException(index, lua_type(L, index), LUA_TBOOLEAN);
+                throw type_error(index, lua_type(L, index), LUA_TBOOLEAN);
             }
             else if constexpr (std::is_same_v<T, const char *> || std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>)
             {
                 if (lua_type(L, index) == LUA_TSTRING)
                     return lua_tostring(L, index);
 
-                throw TypeException(index, lua_type(L, index), LUA_TSTRING);
+                throw type_error(index, lua_type(L, index), LUA_TSTRING);
             }
             else
                 static_assert(!sizeof(T *), "Unsupported type");
         }
 
         template <typename... T, typename std::enable_if_t<(sizeof...(T) >= 2), bool> = true>
-        std::tuple<T...> Get(lua_State *L)
+        std::tuple<T...> get(lua_State *L)
         {
             int index = -1;
-            return std::tuple<T...>(Get<T>(L, index--)...);
+            return std::tuple<T...>(get<T>(L, index--)...);
         }
 
         /**
-         * @brief Push the given value onto the stack.
+         * @brief push the given value onto the stack.
          *
          * @tparam T The type of the value to set.
          * @param L The Lua state.
          * @param value The value to set.
          */
         template <typename T>
-        void Push(lua_State *L, T value)
+        void push(lua_State *L, T value)
         {
             if constexpr (std::is_same_v<T, const char *>)
                 lua_pushstring(L, value);
@@ -90,10 +90,10 @@ namespace easylua
         }
 
         template <typename Arg, typename... Args>
-        void Push(lua_State *L, Arg arg, Args... args)
+        void push(lua_State *L, Arg arg, Args... args)
         {
-            Push(L, arg);
-            Push(L, args...);
+            push(L, arg);
+            push(L, args...);
         }
 
         /**
@@ -101,7 +101,7 @@ namespace easylua
          * @param L The Lua state.
          * @param count The number of values to pop.
          */
-        inline void Pop(lua_State *L, int count = 1)
+        inline void pop(lua_State *L, int count = 1)
         {
             lua_pop(L, count);
         }
@@ -115,12 +115,12 @@ namespace easylua
          * @return true If the value at the given index on the stack is of the given type.
          *         false If the value at the given index on the stack is not of the given type.
          */
-        inline bool CheckType(lua_State *L, int index, int type)
+        inline bool check_type(lua_State *L, int index, int type)
         {
             return lua_type(L, index) == type;
         }
 
-        inline int Top(lua_State *L)
+        inline int get_top(lua_State *L)
         {
             return lua_gettop(L);
         }

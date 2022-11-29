@@ -7,16 +7,16 @@
 
 namespace easylua
 {
-    class StateView
+    class state_view
     {
     public:
-        StateView(lua_State *state) : lua_state_(state)
+        state_view(lua_State *state) : lua_state_(state)
         {
             if (!lua_state_)
-                throw InvalidArgumentException("state", "cannot be null");
+                throw invalid_argument("state", "cannot be null");
         }
 
-        lua_State *GetLuaState() const { return lua_state_; }
+        lua_State *get_state() const { return lua_state_; }
 
     protected:
         lua_State *lua_state_;
