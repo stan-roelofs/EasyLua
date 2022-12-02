@@ -13,8 +13,9 @@ target_compile_features(EasyLua INTERFACE cxx_std_17)
 include(CTest)
 enable_testing()
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+add_test(
+    NAME EasyLuaTest
+    COMMAND $<TARGET_FILE:EasyLuaTest>
+)
 
 add_subdirectory(test)

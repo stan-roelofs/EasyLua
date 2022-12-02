@@ -7,7 +7,6 @@
 
 #include "exception.hpp"
 #include "stack.hpp"
-#include "reference.hpp"
 
 namespace easylua
 {

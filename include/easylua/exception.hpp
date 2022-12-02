@@ -27,6 +27,14 @@ namespace easylua
         {
         }
     };
+
+    class invalid_operation : public runtime_error
+    {
+    public:
+        invalid_operation(std::string why) : runtime_error("Invalid operation: " + why)
+        {
+        }
+    };
 }
 
 #endif
