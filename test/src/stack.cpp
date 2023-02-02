@@ -1,3 +1,4 @@
+#include <easylua/function.hpp>
 #include <easylua/stack.hpp>
 
 #include <gtest/gtest.h>
@@ -138,6 +139,42 @@ TEST_F(Stack, get_nil)
     EXPECT_EQ(nil, stack::get<nil_t>(L, 1));
 }
 
+TEST_F(Stack, get_nil_throws_on_wrong_type)
+{
+    lua_pushnumber(L, 5.5);
+    EXPECT_THROW(stack::get<nil_t>(L, 1), type_error);
+}
+
+static int test_function(lua_State *L)
+{
+    lua_pushnumber(L, 5);
+    return 1;
+}
+
+TEST_F(Stack, get_cfunction)
+{
+    lua_pushcfunction(L, test_function);
+    EXPECT_EQ(test_function, stack::get<lua_CFunction>(L, 1));
+}
+
+TEST_F(Stack, get_cfunction_throws_on_wrong_type)
+{
+    lua_pushnumber(L, 5.5);
+    EXPECT_THROW(stack::get<lua_CFunction>(L, 1), type_error);
+}
+
+TEST_F(Stack, get_unsafe_function_reference)
+{
+    lua_pushcfunction(L, test_function);
+    EXPECT_NO_THROW(unsafe_function_reference f = stack::get<unsafe_function_reference>(L, 1));
+}
+
+TEST_F(Stack, get_unsafe_function_reference_throws_on_wrong_type)
+{
+    lua_pushnumber(L, 5.5);
+    EXPECT_THROW(stack::get<unsafe_function_reference>(L, 1), type_error);
+}
+
 TEST_F(Stack, push_multiple_values)
 {
     stack::push(L, 42);
@@ -203,4 +240,18 @@ TEST_F(Stack, push_nil)
 {
     stack::push(L, nil);
     EXPECT_EQ(lua_type(L, 1), LUA_TNIL);
+}
+
+TEST_F(Stack, push_cfunction)
+{
+    stack::push(L, test_function);
+    EXPECT_EQ(test_function, lua_tocfunction(L, 1));
+}
+
+TEST_F(Stack, push_unsafe_function_reference)
+{
+    lua_pushcfunction(L, test_function);
+    unsafe_function_reference f = stack::get<unsafe_function_reference>(L, 1);
+    stack::push(L, f);
+    EXPECT_EQ(test_function, lua_tocfunction(L, 1));
 }

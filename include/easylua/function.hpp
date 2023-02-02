@@ -6,6 +6,7 @@
 #include <lua.hpp>
 
 #include "exception.hpp"
+#include "reference.hpp"
 #include "stack.hpp"
 
 namespace easylua
@@ -112,38 +113,45 @@ namespace easylua
     };
 
     /** Represents a Lua function on the stack. */
-    class stack_function
+    class unsafe_function_reference : public unsafe_reference
     {
     public:
-        stack_function(lua_State *state, int index = -1) : lua_state_(state), index_(index)
+        unsafe_function_reference(lua_State *state, int index = -1) : unsafe_reference(state, index)
         {
             if (!lua_state_)
                 throw invalid_argument("state", "cannot be null");
+
+            if (!stack::check_type(lua_state_, index_, LUA_TFUNCTION))
+                throw type_error(index_, lua_type(lua_state_, index_), LUA_TFUNCTION);
         }
 
         template <typename... Args>
         function_result operator()(Args... args)
         {
-            lua_pushvalue(lua_state_, index_);
+            push();
             return detail::call_function(lua_state_, args...);
         }
-
-    private:
-        lua_State *lua_state_;
-        int index_;
     };
 
-    /**
-     * @brief Represents a reference to a Lua function. Contrary to a stack_function, instances of this
-     *        class can be stored and used later because the function will be stored in the Lua registry.
-     */
-    // class FunctionReference : public Function, public reference
-    // {
-    // public:
-    //     FunctionReference(lua_State *state, int index = -1) : Function(state, index), reference(state, index)
-    //     {
-    //     }
-    // };
+    class safe_function_reference : public safe_reference
+    {
+    public:
+        safe_function_reference(lua_State *state, int index = -1) : safe_reference(state, index)
+        {
+            if (!lua_state_)
+                throw invalid_argument("state", "cannot be null");
+
+            if (!stack::check_type(lua_state_, index, LUA_TFUNCTION))
+                throw type_error(index, lua_type(lua_state_, index), LUA_TFUNCTION);
+        }
+
+        template <typename... Args>
+        function_result operator()(Args... args)
+        {
+            push();
+            return detail::call_function(lua_state_, args...);
+        }
+    };
 } // namespace easylua
 
 #endif

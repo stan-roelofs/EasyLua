@@ -4,6 +4,7 @@
 #include <lua.hpp>
 
 #include "exception.hpp"
+#include "reference.hpp"
 #include "types.hpp"
 
 namespace easylua
@@ -60,6 +61,17 @@ namespace easylua
 
                 throw type_error(index, lua_type(L, index), LUA_TNIL);
             }
+            else if constexpr (std::is_base_of_v<unsafe_reference, T> || std::is_base_of_v<safe_reference, T>)
+            {
+                return T(L, index);
+            }
+            else if constexpr (std::is_same_v<T, lua_CFunction>)
+            {
+                if (lua_type(L, index) == LUA_TFUNCTION)
+                    return lua_tocfunction(L, index);
+
+                throw type_error(index, lua_type(L, index), LUA_TFUNCTION);
+            }
             else
                 static_assert(!sizeof(T *), "Unsupported type");
         }
@@ -95,6 +107,10 @@ namespace easylua
                 lua_pushnumber(L, value);
             else if constexpr (std::is_same_v<T, nil_t>)
                 lua_pushnil(L);
+            else if constexpr (std::is_base_of_v<unsafe_reference, T> || std::is_base_of_v<safe_reference, T>)
+                value.push();
+            else if constexpr (std::is_same_v<T, lua_CFunction>)
+                lua_pushcfunction(L, value);
             else
                 static_assert(!sizeof(T *), "Unsupported type");
         }
