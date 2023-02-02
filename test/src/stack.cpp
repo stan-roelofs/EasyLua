@@ -132,6 +132,12 @@ TEST_F(Stack, get_c_string_throws_on_wrong_type)
     EXPECT_THROW(stack::get<const char *>(L, 1), type_error);
 }
 
+TEST_F(Stack, get_nil)
+{
+    lua_pushnil(L);
+    EXPECT_EQ(nil, stack::get<nil_t>(L, 1));
+}
+
 TEST_F(Stack, push_multiple_values)
 {
     stack::push(L, 42);
@@ -191,4 +197,10 @@ TEST_F(Stack, push_c_string)
 {
     stack::push(L, "Hello");
     EXPECT_STREQ("Hello", lua_tostring(L, 1));
+}
+
+TEST_F(Stack, push_nil)
+{
+    stack::push(L, nil);
+    EXPECT_EQ(lua_type(L, 1), LUA_TNIL);
 }

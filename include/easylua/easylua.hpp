@@ -7,5 +7,6 @@
 #include "stack.hpp"
 #include "state.hpp"
 #include "state_view.hpp"
+#include "types.hpp"
 
 #endif

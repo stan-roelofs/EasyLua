@@ -4,6 +4,7 @@
 #include <lua.hpp>
 
 #include "exception.hpp"
+#include "types.hpp"
 
 namespace easylua
 {
@@ -52,6 +53,13 @@ namespace easylua
 
                 throw type_error(index, lua_type(L, index), LUA_TSTRING);
             }
+            else if constexpr (std::is_same_v<T, nil_t>)
+            {
+                if (lua_type(L, index) == LUA_TNIL)
+                    return nil;
+
+                throw type_error(index, lua_type(L, index), LUA_TNIL);
+            }
             else
                 static_assert(!sizeof(T *), "Unsupported type");
         }
@@ -85,6 +93,8 @@ namespace easylua
                 lua_pushinteger(L, value);
             else if constexpr (std::is_floating_point_v<T> || std::is_same_v<T, lua_Number>)
                 lua_pushnumber(L, value);
+            else if constexpr (std::is_same_v<T, nil_t>)
+                lua_pushnil(L);
             else
                 static_assert(!sizeof(T *), "Unsupported type");
         }
