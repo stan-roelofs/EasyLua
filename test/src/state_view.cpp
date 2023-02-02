@@ -99,5 +99,64 @@ TEST(state_view, get_global_string)
     lua_close(L);
 }
 
+TEST(state_view, get_global_nil)
+{
+    lua_State *L = luaL_newstate();
+    lua_pushnil(L);
+    lua_setglobal(L, "test");
 
+    easylua::state_view state(L);
+    easylua::nil_t value = state["test"];
+    EXPECT_EQ(easylua::nil, value);
 
+    lua_close(L);
+}
+
+TEST(state_view, get_global_nonexistent)
+{
+    lua_State *L = luaL_newstate();
+    easylua::state_view state(L);
+    EXPECT_THROW(int test = state["test"];, easylua::type_error);
+}
+
+// TODO get table
+
+TEST(state_view, set_global_bool)
+{
+    lua_State *L = luaL_newstate();
+    easylua::state_view state(L);
+    state["test"] = true;
+
+    lua_getglobal(L, "test");
+    EXPECT_EQ(true, lua_toboolean(L, -1));
+}
+
+TEST(state_view, set_global_int)
+{
+    lua_State *L = luaL_newstate();
+    easylua::state_view state(L);
+    state["test"] = 5;
+
+    lua_getglobal(L, "test");
+    EXPECT_EQ(5, lua_tointeger(L, -1));
+}
+
+TEST(state_view, set_global_double)
+{
+    lua_State *L = luaL_newstate();
+    easylua::state_view state(L);
+    state["test"] = 3.14;
+
+    lua_getglobal(L, "test");
+    EXPECT_EQ(3.14, lua_tonumber(L, -1));
+}
+
+TEST(state_view, set_global_string)
+{
+    lua_State *L = luaL_newstate();
+    easylua::state_view state(L);
+    state["test"] = "hello";
+
+    lua_getglobal(L, "test");
+    EXPECT_STREQ("hello", lua_tostring(L, -1));
+}

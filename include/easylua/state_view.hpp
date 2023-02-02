@@ -23,32 +23,37 @@ namespace easylua
         class get_result
         {
         public:
-            get_result(lua_State* state, int index) : lua_state_(state), index_(index)
+            get_result(lua_State *state, const char *name) : lua_state_(state), name_(name)
             {
             }
 
-            get_result(const get_result& other) = delete;
-            get_result(get_result&& other) = delete;
-            get_result& operator=(const get_result& other) = delete;
-            get_result& operator=(get_result&& other) = delete;
+            get_result(const get_result &other) = delete;
+            get_result(get_result &&other) = delete;
+            get_result &operator=(const get_result &other) = delete;
+            get_result &operator=(get_result &&other) = delete;
 
             template <typename T>
-            operator T() const &&
+            operator T() const
             {
-                return stack::get<T>(lua_state_, index_);
+                lua_getglobal(lua_state_, name_.c_str());
+                return stack::get<T>(lua_state_, -1);
             }
 
-            // TODO reference
+            template <typename T>
+            void operator=(T value) const
+            {
+                stack::push<T>(lua_state_, std::forward<T>(value));
+                lua_setglobal(lua_state_, name_.c_str());
+            }
 
         private:
-            lua_State* lua_state_;
-            int index_;
+            lua_State *lua_state_;
+            std::string name_;
         };
 
         get_result operator[](const char *name) const
         {
-            lua_getglobal(lua_state_, name);
-            return get_result(lua_state_, -1);
+            return get_result(lua_state_, name);
         }
 
     protected:
