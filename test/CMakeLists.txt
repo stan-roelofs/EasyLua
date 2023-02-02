@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.18.0)
 
 set(SOURCES
     src/function.cpp
+    src/reference.cpp
     src/script.cpp
     src/stack.cpp
     src/state.cpp
