@@ -5,6 +5,7 @@
 
 #include "exception.hpp"
 #include "reference.hpp"
+#include "script.hpp"
 #include "stack.hpp"
 
 namespace easylua
@@ -19,6 +20,26 @@ namespace easylua
         }
 
         lua_State *get_state() const { return lua_state_; }
+
+        script::load_result load(const std::string &code)
+        {
+            return script::load_string(lua_state_, code);
+        }
+
+        script::load_result load_file(const std::string &filename)
+        {
+            return script::load_file(lua_state_, filename);
+        }
+
+        script::load_result run(const std::string &code)
+        {
+            return script::run_string(lua_state_, code);
+        }
+
+        script::load_result run_file(const std::string &filename)
+        {
+            return script::run_file(lua_state_, filename);
+        }
 
         class get_result
         {
@@ -45,6 +66,13 @@ namespace easylua
                 stack::push<T>(lua_state_, std::forward<T>(value));
                 lua_setglobal(lua_state_, name_.c_str());
             }
+
+            // template <typename T>
+            // bool operator==(const T &value) const
+            // {
+            //     lua_getglobal(lua_state_, name_.c_str());
+            //     return stack::get<T>(lua_state_, -1) == value;
+            // }
 
         private:
             lua_State *lua_state_;
