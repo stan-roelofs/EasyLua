@@ -35,9 +35,16 @@ int main(int argc, char **argv)
     int factorial_result = factorial(5);
     std::cout << "factorial(5) = " << factorial_result << std::endl;
 
-    easylua::safe_function_reference fact = state["fact"];
+    easylua::unsafe_function_reference fact = state["fact"];
     factorial_result = fact(10);
     std::cout << "fact(10) = " << factorial_result << std::endl;
+
+    // Calling the safe function reference again should work
+    factorial_result = factorial(5);
+    std::cout << "factorial(11) = " << factorial_result << std::endl;
+
+    // But calling the unsafe function reference again is not allowed because
+    // the stack is not in the same state as before
 
     return 0;
 }
