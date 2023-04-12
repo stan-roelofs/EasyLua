@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.0)
 
 project(EasyLua VERSION 0.1.0
-    DESCRIPTION "A header-only library C++ wrapper for Lua"
+    DESCRIPTION "A header-only C++ wrapper for Lua"
     HOMEPAGE_URL "https://github.com/stan-roelofs/EasyLua"
     LANGUAGES CXX
 )
@@ -19,3 +19,4 @@ add_test(
 )
 
 add_subdirectory(test)
+add_subdirectory(examples)
