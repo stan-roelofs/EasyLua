@@ -116,13 +116,8 @@ namespace easylua
     class unsafe_function_reference : public unsafe_reference
     {
     public:
-        unsafe_function_reference(lua_State *state, int index = -1) : unsafe_reference(state, index)
+        unsafe_function_reference(lua_State *state, int index = -1) : unsafe_reference(state, index, LUA_TFUNCTION)
         {
-            if (!lua_state_)
-                throw invalid_argument("state", "cannot be null");
-
-            if (!stack::check_type(lua_state_, index_, LUA_TFUNCTION))
-                throw type_error(index_, lua_type(lua_state_, index_), LUA_TFUNCTION);
         }
 
         template <typename... Args>
@@ -136,13 +131,8 @@ namespace easylua
     class safe_function_reference : public safe_reference
     {
     public:
-        safe_function_reference(lua_State *state, int index = -1) : safe_reference(state, index)
+        safe_function_reference(lua_State *state, int index = -1) : safe_reference(state, index, LUA_TFUNCTION)
         {
-            if (!lua_state_)
-                throw invalid_argument("state", "cannot be null");
-
-            if (!stack::check_type(lua_state_, index, LUA_TFUNCTION))
-                throw type_error(index, lua_type(lua_state_, index), LUA_TFUNCTION);
         }
 
         template <typename... Args>

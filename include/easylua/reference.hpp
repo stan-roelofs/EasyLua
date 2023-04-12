@@ -14,6 +14,21 @@ namespace easylua
 
         /// @brief Pushes the referenced value onto the stack.
         virtual void push() const = 0;
+
+    protected:
+        reference(lua_State *state, int index, int expected_type) : lua_state_(state)
+        {
+            if (!state)
+                throw invalid_argument("state", "cannot be null");
+
+            if (index == 0)
+                throw invalid_argument("index", "cannot be 0");
+
+            if (lua_type(state, index) != expected_type)
+                throw type_error(index, lua_type(state, index), expected_type);
+        }
+
+        lua_State *lua_state_;
     };
 
     class unsafe_reference : public reference
@@ -25,19 +40,10 @@ namespace easylua
         }
 
     protected:
-        unsafe_reference(lua_State *state, int index) : lua_state_(state), index_(index)
+        unsafe_reference(lua_State *state, int index, int expected_type) : reference(state, index, expected_type), index_(index)
         {
-            if (!lua_state_)
-                throw invalid_argument("state", "cannot be null");
-
-            if (index == 0)
-                throw invalid_argument("index", "cannot be 0");
-
-            if (lua_type(lua_state_, index_) == LUA_TNONE)
-                throw invalid_argument("index", "cannot be LUA_TNONE");
         }
 
-        lua_State *lua_state_;
         int index_;
     };
 
@@ -53,69 +59,60 @@ namespace easylua
         }
 
     protected:
-        safe_reference(lua_State *state, int index) : lua_state_(state), reference_(LUA_NOREF)
+        safe_reference(lua_State *state, int index, int expected_type) : reference(state, index, expected_type), reference_(LUA_NOREF)
         {
-            if (!lua_state_)
-                throw invalid_argument("state", "cannot be null");
-
-            if (index == 0)
-                throw invalid_argument("index", "cannot be 0");
-
-            if (lua_type(lua_state_, index) == LUA_TNONE)
-                throw invalid_argument("index", "cannot be LUA_TNONE");
-
             reference_ = luaL_ref(lua_state_, LUA_REGISTRYINDEX);
         }
 
-        safe_reference(const safe_reference &other) : lua_state_(other.lua_state_), reference_(LUA_NOREF)
-        {
-            if (other.reference_ != LUA_NOREF)
-            {
-                lua_rawgeti(lua_state_, LUA_REGISTRYINDEX, other.reference_);
-                reference_ = luaL_ref(lua_state_, LUA_REGISTRYINDEX);
-            }
-        }
+        // safe_reference(const safe_reference &other) : reference(other), reference_(LUA_NOREF)
+        // {
+        //     if (other.reference_ != LUA_NOREF)
+        //     {
+        //         lua_rawgeti(lua_state_, LUA_REGISTRYINDEX, other.reference_);
+        //         reference_ = luaL_ref(lua_state_, LUA_REGISTRYINDEX);
+        //     }
+        // }
 
-        safe_reference(safe_reference &&other) : lua_state_(other.lua_state_), reference_(other.reference_)
-        {
-            other.reference_ = LUA_NOREF;
-        }
+        // safe_reference(safe_reference &&other) : reference(other), reference_(other.reference_)
+        // {
+        //     other.reference_ = LUA_NOREF;
+        // }
 
-        safe_reference &operator=(const safe_reference &other)
-        {
-            if (this != &other)
-            {
-                if (reference_ != LUA_NOREF)
-                    luaL_unref(lua_state_, LUA_REGISTRYINDEX, reference_);
+        // safe_reference &operator=(const safe_reference &other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         if (reference_ != LUA_NOREF)
+        //             luaL_unref(lua_state_, LUA_REGISTRYINDEX, reference_);
 
-                lua_state_ = other.lua_state_;
-                reference_ = LUA_NOREF;
+        //         lua_state_ = other.lua_state_;
+        //         reference_ = LUA_NOREF;
 
-                if (other.reference_ != LUA_NOREF)
-                {
-                    lua_rawgeti(lua_state_, LUA_REGISTRYINDEX, other.reference_);
-                    reference_ = luaL_ref(lua_state_, LUA_REGISTRYINDEX);
-                }
-            }
+        //         if (other.reference_ != LUA_NOREF)
+        //         {
+        //             lua_rawgeti(lua_state_, LUA_REGISTRYINDEX, other.reference_);
+        //             reference_ = luaL_ref(lua_state_, LUA_REGISTRYINDEX);
+        //         }
+        //     }
 
-            return *this;
-        }
+        //     return *this;
+        // }
 
-        safe_reference &operator=(safe_reference &&other)
-        {
-            if (this != &other)
-            {
-                if (reference_ != LUA_NOREF)
-                    luaL_unref(lua_state_, LUA_REGISTRYINDEX, reference_);
+        // safe_reference &operator=(safe_reference &&other)
+        // {
+        //     if (this != &other)
+        //     {
+        //         if (reference_ != LUA_NOREF)
+        //             luaL_unref(lua_state_, LUA_REGISTRYINDEX, reference_);
 
-                lua_state_ = other.lua_state_;
-                reference_ = other.reference_;
+        //         lua_state_ = other.lua_state_;
+        //         reference_ = other.reference_;
 
-                other.reference_ = LUA_NOREF;
-            }
+        //         other.reference_ = LUA_NOREF;
+        //     }
 
-            return *this;
-        }
+        //     return *this;
+        // }
 
         ~safe_reference()
         {
@@ -123,7 +120,6 @@ namespace easylua
                 luaL_unref(lua_state_, LUA_REGISTRYINDEX, reference_);
         }
 
-        lua_State *lua_state_;
         int reference_;
     };
 } // namespace easylua
