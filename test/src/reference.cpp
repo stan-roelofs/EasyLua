@@ -72,10 +72,13 @@ TEST(safe_reference, push)
 {
     lua_State *L = luaL_newstate();
     lua_pushnumber(L, 5);
-    mock_safe_reference ref(L, 1);
-    // ref.push();
-    ASSERT_EQ(LUA_TNUMBER, lua_type(L, -1));
-    ASSERT_EQ(5, lua_tonumber(L, -1));
+    {
+        mock_safe_reference ref(L, 1);
+        ref.push();
+        // ref.push();
+        ASSERT_EQ(LUA_TNUMBER, lua_type(L, -1));
+        ASSERT_EQ(5, lua_tonumber(L, -1));
+    }
     lua_close(L);
 }
 
@@ -83,7 +86,10 @@ TEST(safe_reference, push_throws_with_invalid_reference)
 {
     lua_State *L = luaL_newstate();
     lua_pushnumber(L, 5);
-    mock_safe_reference ref(L, 1);
-    ref.reference() = LUA_NOREF;
-    EXPECT_THROW(ref.push(), easylua::runtime_error);
+    {
+        mock_safe_reference ref(L, 1);
+        ref.reference() = LUA_NOREF;
+        EXPECT_THROW(ref.push(), easylua::runtime_error);
+    }
+    lua_close(L);
 }
