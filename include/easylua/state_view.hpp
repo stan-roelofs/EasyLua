@@ -21,6 +21,7 @@ namespace easylua
 
         lua_State *get_state() const { return lua_state_; }
 
+        operator lua_State *() const { return lua_state_; }
         script::load_result load(const std::string &code)
         {
             return script::load_string(lua_state_, code);
