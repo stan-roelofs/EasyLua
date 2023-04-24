@@ -19,9 +19,22 @@ namespace easylua
                 throw invalid_argument("state", "cannot be null");
         }
 
+        state_view(const state_view &other) = delete;
+        state_view(state_view &&other)
+        {
+            std::swap(lua_state_, other.lua_state_);
+        }
+        state_view &operator=(const state_view &other) = delete;
+        state_view &operator=(state_view &&other)
+        {
+            std::swap(lua_state_, other.lua_state_);
+            return *this;
+        }
+
         lua_State *get_state() const { return lua_state_; }
 
         operator lua_State *() const { return lua_state_; }
+
         script::load_result load(const std::string &code)
         {
             return script::load_string(lua_state_, code);
